@@ -37,7 +37,8 @@ use syntax_pos::symbol::Symbol;
 extern crate flate2;
 extern crate libc;
 extern crate owning_ref;
-#[macro_use] extern crate rustc;
+#[macro_use]
+extern crate rustc;
 extern crate rustc_allocator;
 extern crate rustc_back;
 extern crate rustc_data_structures;
@@ -52,15 +53,21 @@ extern crate rustc_demangle;
 extern crate jobserver;
 extern crate num_cpus;
 
-#[macro_use] extern crate log;
-#[macro_use] extern crate syntax;
+#[macro_use]
+extern crate log;
+#[macro_use]
+extern crate syntax;
 extern crate syntax_pos;
 extern crate rustc_errors as errors;
 extern crate serialize;
 #[cfg(windows)]
 extern crate gcc; // Used to locate MSVC, not gcc :)
 
-pub use base::trans_crate;
+pub use base::{trans_crate, find_exported_symbols, write_metadata,
+               collect_and_partition_translation_items};
+pub use partitioning::CodegenUnit;
+pub use trans_item::TransItem;
+pub use context::{SharedCrateContext, CrateContext};
 pub use back::symbol_names::provide;
 
 pub use metadata::LlvmMetadataLoader;
@@ -71,7 +78,7 @@ pub mod back {
     pub(crate) mod linker;
     pub mod link;
     mod lto;
-    pub(crate) mod symbol_export;
+    pub mod symbol_export;
     pub(crate) mod symbol_names;
     pub mod write;
     mod rpath;
@@ -105,7 +112,7 @@ mod cabi_x86;
 mod cabi_x86_64;
 mod cabi_x86_win64;
 mod callee;
-mod collector;
+pub mod collector;
 mod common;
 mod consts;
 mod context;
@@ -170,12 +177,10 @@ impl Drop for ModuleTranslation {
         match self.source {
             ModuleSource::Preexisting(_) => {
                 // Nothing to dispose.
-            },
-            ModuleSource::Translated(llvm) => {
-                unsafe {
-                    llvm::LLVMDisposeModule(llvm.llmod);
-                    llvm::LLVMContextDispose(llvm.llcx);
-                }
+            }
+            ModuleSource::Translated(llvm) => unsafe {
+                llvm::LLVMDisposeModule(llvm.llmod);
+                llvm::LLVMContextDispose(llvm.llcx);
             },
         }
     }
@@ -206,8 +211,8 @@ pub struct ModuleLlvm {
     pub llmod: llvm::ModuleRef,
 }
 
-unsafe impl Send for ModuleTranslation { }
-unsafe impl Sync for ModuleTranslation { }
+unsafe impl Send for ModuleTranslation {}
+unsafe impl Sync for ModuleTranslation {}
 
 pub struct CrateTranslation {
     pub crate_name: Symbol,
@@ -216,7 +221,7 @@ pub struct CrateTranslation {
     pub link: rustc::middle::cstore::LinkMeta,
     pub metadata: rustc::middle::cstore::EncodedMetadata,
     windows_subsystem: Option<String>,
-    linker_info: back::linker::LinkerInfo
+    linker_info: back::linker::LinkerInfo,
 }
 
 __build_diagnostic_array! { librustc_trans, DIAGNOSTICS }

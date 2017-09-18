@@ -322,7 +322,7 @@ pub fn collect_crate_translation_items<'a, 'tcx>(scx: &SharedCrateContext<'a, 't
 
 // Find all non-generic items by walking the HIR. These items serve as roots to
 // start monomorphizing from.
-fn collect_roots<'a, 'tcx>(scx: &SharedCrateContext<'a, 'tcx>,
+pub fn collect_roots<'a, 'tcx>(scx: &SharedCrateContext<'a, 'tcx>,
                            exported_symbols: &ExportedSymbols,
                            mode: TransItemCollectionMode)
                            -> Vec<TransItem<'tcx>> {
