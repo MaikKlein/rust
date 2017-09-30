@@ -73,6 +73,7 @@ pub use back::symbol_names::provide;
 pub use metadata::LlvmMetadataLoader;
 pub use llvm_util::{init, target_features, print_version, print_passes, print, enable_llvm_debug};
 
+pub use monomorphize::resolve;
 pub mod back {
     mod archive;
     pub(crate) mod linker;
