@@ -43,6 +43,7 @@ extern crate flate2;
 extern crate libc;
 extern crate owning_ref;
 #[macro_use] extern crate rustc;
+extern crate rustc_mir;
 extern crate rustc_allocator;
 extern crate rustc_apfloat;
 extern crate rustc_back;
@@ -85,7 +86,6 @@ use rustc::ty::maps::Providers;
 use rustc::ty::{self, TyCtxt};
 use rustc::util::nodemap::{FxHashSet, FxHashMap};
 
-use rustc_trans_utils::collector;
 use rustc_trans_utils::monomorphize;
 
 mod diagnostics;

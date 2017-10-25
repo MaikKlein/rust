@@ -42,6 +42,7 @@ extern crate syntax_pos;
 extern crate rustc_const_math;
 extern crate rustc_const_eval;
 extern crate core; // for NonZero
+extern crate rustc_trans_utils;
 
 mod diagnostics;
 
@@ -52,6 +53,7 @@ mod hair;
 mod shim;
 pub mod transform;
 pub mod util;
+pub mod monomorphize;
 
 use rustc::ty::maps::Providers;
 
