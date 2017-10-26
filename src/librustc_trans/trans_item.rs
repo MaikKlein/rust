@@ -45,7 +45,7 @@ pub trait MonoItemExt<'a, 'tcx>: fmt::Debug + BaseMonoItemExt<'a, 'tcx> {
                self.to_raw_string(),
                ccx.codegen_unit().name());
 
-        match *self.as_trans_item() {
+        match *self.as_mono_item() {
             MonoItem::Static(node_id) => {
                 let tcx = ccx.tcx();
                 let item = tcx.hir.expect_item(node_id);
@@ -92,7 +92,7 @@ pub trait MonoItemExt<'a, 'tcx>: fmt::Debug + BaseMonoItemExt<'a, 'tcx> {
 
         debug!("symbol {}", &symbol_name);
 
-        match *self.as_trans_item() {
+        match *self.as_mono_item() {
             MonoItem::Static(node_id) => {
                 predefine_static(ccx, node_id, linkage, visibility, &symbol_name);
             }
@@ -109,7 +109,7 @@ pub trait MonoItemExt<'a, 'tcx>: fmt::Debug + BaseMonoItemExt<'a, 'tcx> {
     }
 
     fn symbol_name(&self, tcx: TyCtxt<'a, 'tcx, 'tcx>) -> ty::SymbolName {
-        match *self.as_trans_item() {
+        match *self.as_mono_item() {
             MonoItem::Fn(instance) => tcx.symbol_name(instance),
             MonoItem::Static(node_id) => {
                 let def_id = tcx.hir.local_def_id(node_id);
@@ -125,7 +125,7 @@ pub trait MonoItemExt<'a, 'tcx>: fmt::Debug + BaseMonoItemExt<'a, 'tcx> {
     }
 
     fn local_span(&self, tcx: TyCtxt<'a, 'tcx, 'tcx>) -> Option<Span> {
-        match *self.as_trans_item() {
+        match *self.as_mono_item() {
             MonoItem::Fn(Instance { def, .. }) => {
                 tcx.hir.as_local_node_id(def.def_id())
             }
@@ -137,7 +137,7 @@ pub trait MonoItemExt<'a, 'tcx>: fmt::Debug + BaseMonoItemExt<'a, 'tcx> {
     }
 
     fn is_generic_fn(&self) -> bool {
-        match *self.as_trans_item() {
+        match *self.as_mono_item() {
             MonoItem::Fn(ref instance) => {
                 instance.substs.types().next().is_some()
             }
@@ -147,7 +147,7 @@ pub trait MonoItemExt<'a, 'tcx>: fmt::Debug + BaseMonoItemExt<'a, 'tcx> {
     }
 
     fn to_raw_string(&self) -> String {
-        match *self.as_trans_item() {
+        match *self.as_mono_item() {
             MonoItem::Fn(instance) => {
                 format!("Fn({:?}, {})",
                          instance.def,
