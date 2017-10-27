@@ -37,7 +37,7 @@ use llvm;
 use metadata;
 use rustc::hir::def_id::{CrateNum, DefId, LOCAL_CRATE};
 use rustc::middle::lang_items::StartFnLangItem;
-use rustc::middle::trans::{Linkage, Visibility, Stats};
+use rustc::mir::mono::{Linkage, Visibility, Stats};
 use rustc::middle::cstore::{EncodedMetadata, EncodedMetadataHashes};
 use rustc::ty::{self, Ty, TyCtxt};
 use rustc::ty::maps::Providers;

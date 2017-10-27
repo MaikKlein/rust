@@ -25,7 +25,7 @@ use monomorphize::Instance;
 use partitioning::CodegenUnit;
 use type_::Type;
 use rustc_data_structures::base_n;
-use rustc::middle::trans::Stats;
+use rustc::mir::mono::Stats;
 use rustc_data_structures::stable_hasher::StableHashingContextProvider;
 use rustc::session::config::{self, NoDebugInfo};
 use rustc::session::Session;
