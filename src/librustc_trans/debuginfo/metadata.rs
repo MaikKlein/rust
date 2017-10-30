@@ -32,7 +32,7 @@ use rustc::ty::util::TypeIdHasher;
 use rustc::hir;
 use rustc::ich::Fingerprint;
 use {type_of, machine, monomorphize};
-use common::{self, CrateContext};
+use common::CrateContext;
 use type_::Type;
 use rustc::ty::{self, AdtKind, Ty};
 use rustc::ty::layout::{self, LayoutTyper};
@@ -1818,7 +1818,7 @@ pub fn create_global_var_metadata(cx: &CrateContext,
     };
 
     let is_local_to_unit = is_node_local_to_unit(cx, node_id);
-    let variable_type = common::def_ty(cx.tcx(), node_def_id, Substs::empty());
+    let variable_type = cx.tcx().type_of(node_def_id);
     let type_metadata = type_metadata(cx, variable_type, span);
     let var_name = tcx.item_name(node_def_id).to_string();
     let linkage_name = mangled_name_of_item(cx, node_def_id, "");

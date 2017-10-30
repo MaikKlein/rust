@@ -17,7 +17,7 @@ use rustc::middle::const_val::ConstEvalErr;
 use {debuginfo, machine};
 use base;
 use trans_item::{MonoItem, MonoItemExt};
-use common::{self, CrateContext, val_ty};
+use common::{CrateContext, val_ty};
 use declare;
 use monomorphize::Instance;
 use type_::Type;
@@ -109,7 +109,7 @@ pub fn get_static(ccx: &CrateContext, def_id: DefId) -> ValueRef {
         return g;
     }
 
-    let ty = common::instance_ty(ccx.tcx(), &instance);
+    let ty = instance.ty(ccx.tcx());
     let g = if let Some(id) = ccx.tcx().hir.as_local_node_id(def_id) {
 
         let llty = type_of::type_of(ccx, ty);
@@ -265,7 +265,7 @@ pub fn trans_static<'a, 'tcx>(ccx: &CrateContext<'a, 'tcx>,
         };
 
         let instance = Instance::mono(ccx.tcx(), def_id);
-        let ty = common::instance_ty(ccx.tcx(), &instance);
+        let ty = instance.ty(ccx.tcx());
         let llty = type_of::type_of(ccx, ty);
         let g = if val_llty == llty {
             g

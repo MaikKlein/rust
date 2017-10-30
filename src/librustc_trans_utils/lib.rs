@@ -45,8 +45,6 @@ use rustc::hir::def_id::LOCAL_CRATE;
 use rustc::hir::map as hir_map;
 use rustc::util::nodemap::NodeSet;
 
-use syntax::attr;
-
 pub mod link;
 pub mod trans_crate;
 
@@ -105,7 +103,7 @@ pub fn find_exported_symbols<'a, 'tcx>(tcx: TyCtxt<'a, 'tcx, 'tcx>) -> NodeSet {
                 (generics.parent_types == 0 && generics.types.is_empty()) &&
                 // Functions marked with #[inline] are only ever translated
                 // with "internal" linkage and are never exported.
-                !common::requests_inline(tcx, &Instance::mono(tcx, def_id))
+                Instance::mono(tcx, def_id).def.requires_local(tcx)
             }
 
             _ => false

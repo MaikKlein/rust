@@ -46,7 +46,7 @@ pub fn get_fn<'a, 'tcx>(ccx: &CrateContext<'a, 'tcx>,
     assert!(!instance.substs.has_escaping_regions());
     assert!(!instance.substs.has_param_types());
 
-    let fn_ty = common::instance_ty(ccx.tcx(), &instance);
+    let fn_ty = instance.ty(ccx.tcx());
     if let Some(&llfn) = ccx.instances().borrow().get(&instance) {
         return llfn;
     }
@@ -94,7 +94,7 @@ pub fn get_fn<'a, 'tcx>(ccx: &CrateContext<'a, 'tcx>,
         assert_eq!(common::val_ty(llfn), llptrty);
         debug!("get_fn: not casting pointer!");
 
-        if common::is_inline_instance(tcx, &instance) {
+        if instance.def.is_inline(tcx) {
             attributes::inline(llfn, attributes::InlineAttr::Hint);
         }
         let attrs = instance.def.attrs(ccx.tcx());

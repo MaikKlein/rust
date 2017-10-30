@@ -549,8 +549,7 @@ impl<'a, 'tcx> MirContext<'a, 'tcx> {
                             bug!("Cannot use direct operand with an intrinsic call")
                     };
 
-                    let callee_ty = common::instance_ty(
-                        bcx.ccx.tcx(), instance.as_ref().unwrap());
+                    let callee_ty = instance.as_ref().unwrap().ty(bcx.ccx.tcx());
                     trans_intrinsic_call(&bcx, callee_ty, &fn_ty, &llargs, dest,
                                          terminator.source_info.span);
 
