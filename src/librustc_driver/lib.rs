@@ -684,7 +684,7 @@ impl RustcDefaultCalls {
     }
 
 
-    fn print_crate_info(sess: &Session,
+    pub fn print_crate_info(sess: &Session,
                         input: Option<&Input>,
                         odir: &Option<PathBuf>,
                         ofile: &Option<PathBuf>)
