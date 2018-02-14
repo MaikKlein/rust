@@ -104,20 +104,21 @@ use rustc::middle;
 use rustc::session;
 use rustc::util;
 
-use hir::map as hir_map;
+//use hir::map as hir_map;
 use rustc::infer::InferOk;
 use rustc::ty::subst::Substs;
 use rustc::ty::{self, Ty, TyCtxt};
 use rustc::ty::maps::Providers;
-use rustc::traits::{FulfillmentContext, ObligationCause, ObligationCauseCode, Reveal};
-use session::{CompileIncomplete, config};
+use rustc::traits::{FulfillmentContext, ObligationCause, Reveal};
+//use rustc::traits::{FulfillmentContext, ObligationCause, ObligationCauseCode, Reveal};
+use session::{CompileIncomplete};
 use util::common::time;
 
-use syntax::ast;
+//use syntax::ast;
 use syntax::abi::Abi;
 use syntax_pos::Span;
 
-use std::iter;
+//use std::iter;
 
 // NB: This module needs to be declared first so diagnostics are
 // registered before they are used.
@@ -179,129 +180,129 @@ fn require_same_types<'a, 'tcx>(tcx: TyCtxt<'a, 'tcx, 'tcx>,
     })
 }
 
-fn check_main_fn_ty<'a, 'tcx>(tcx: TyCtxt<'a, 'tcx, 'tcx>,
-                              main_id: ast::NodeId,
-                              main_span: Span) {
-    let main_def_id = tcx.hir.local_def_id(main_id);
-    let main_t = tcx.type_of(main_def_id);
-    match main_t.sty {
-        ty::TyFnDef(..) => {
-            match tcx.hir.find(main_id) {
-                Some(hir_map::NodeItem(it)) => {
-                    match it.node {
-                        hir::ItemFn(.., ref generics, _) => {
-                            if !generics.params.is_empty() {
-                                struct_span_err!(tcx.sess, generics.span, E0131,
-                                         "main function is not allowed to have type parameters")
-                                    .span_label(generics.span,
-                                                "main cannot have type parameters")
-                                    .emit();
-                                return;
-                            }
-                        }
-                        _ => ()
-                    }
-                }
-                _ => ()
-            }
+// fn check_main_fn_ty<'a, 'tcx>(tcx: TyCtxt<'a, 'tcx, 'tcx>,
+//                               main_id: ast::NodeId,
+//                               main_span: Span) {
+//     let main_def_id = tcx.hir.local_def_id(main_id);
+//     let main_t = tcx.type_of(main_def_id);
+//     match main_t.sty {
+//         ty::TyFnDef(..) => {
+//             match tcx.hir.find(main_id) {
+//                 Some(hir_map::NodeItem(it)) => {
+//                     match it.node {
+//                         hir::ItemFn(.., ref generics, _) => {
+//                             if !generics.params.is_empty() {
+//                                 struct_span_err!(tcx.sess, generics.span, E0131,
+//                                          "main function is not allowed to have type parameters")
+//                                     .span_label(generics.span,
+//                                                 "main cannot have type parameters")
+//                                     .emit();
+//                                 return;
+//                             }
+//                         }
+//                         _ => ()
+//                     }
+//                 }
+//                 _ => ()
+//             }
 
-            let actual = tcx.fn_sig(main_def_id);
-            let expected_return_type = if tcx.lang_items().termination().is_some()
-                && tcx.sess.features.borrow().termination_trait {
-                // we take the return type of the given main function, the real check is done
-                // in `check_fn`
-                actual.output().skip_binder()
-            } else {
-                // standard () main return type
-                tcx.mk_nil()
-            };
+//             let actual = tcx.fn_sig(main_def_id);
+//             let expected_return_type = if tcx.lang_items().termination().is_some()
+//                 && tcx.sess.features.borrow().termination_trait {
+//                 // we take the return type of the given main function, the real check is done
+//                 // in `check_fn`
+//                 actual.output().skip_binder()
+//             } else {
+//                 // standard () main return type
+//                 tcx.mk_nil()
+//             };
 
-            let se_ty = tcx.mk_fn_ptr(ty::Binder(
-                tcx.mk_fn_sig(
-                    iter::empty(),
-                    expected_return_type,
-                    false,
-                    hir::Unsafety::Normal,
-                    Abi::Rust
-                )
-            ));
+//             let se_ty = tcx.mk_fn_ptr(ty::Binder(
+//                 tcx.mk_fn_sig(
+//                     iter::empty(),
+//                     expected_return_type,
+//                     false,
+//                     hir::Unsafety::Normal,
+//                     Abi::Rust
+//                 )
+//             ));
 
-            require_same_types(
-                tcx,
-                &ObligationCause::new(main_span, main_id, ObligationCauseCode::MainFunctionType),
-                se_ty,
-                tcx.mk_fn_ptr(actual));
-        }
-        _ => {
-            span_bug!(main_span,
-                      "main has a non-function type: found `{}`",
-                      main_t);
-        }
-    }
-}
+//             require_same_types(
+//                 tcx,
+//                 &ObligationCause::new(main_span, main_id, ObligationCauseCode::MainFunctionType),
+//                 se_ty,
+//                 tcx.mk_fn_ptr(actual));
+//         }
+//         _ => {
+//             span_bug!(main_span,
+//                       "main has a non-function type: found `{}`",
+//                       main_t);
+//         }
+//     }
+// }
 
-fn check_start_fn_ty<'a, 'tcx>(tcx: TyCtxt<'a, 'tcx, 'tcx>,
-                               start_id: ast::NodeId,
-                               start_span: Span) {
-    let start_def_id = tcx.hir.local_def_id(start_id);
-    let start_t = tcx.type_of(start_def_id);
-    match start_t.sty {
-        ty::TyFnDef(..) => {
-            match tcx.hir.find(start_id) {
-                Some(hir_map::NodeItem(it)) => {
-                    match it.node {
-                        hir::ItemFn(..,ref ps,_)
-                        if !ps.params.is_empty() => {
-                            struct_span_err!(tcx.sess, ps.span, E0132,
-                                "start function is not allowed to have type parameters")
-                                .span_label(ps.span,
-                                            "start function cannot have type parameters")
-                                .emit();
-                            return;
-                        }
-                        _ => ()
-                    }
-                }
-                _ => ()
-            }
+// fn check_start_fn_ty<'a, 'tcx>(tcx: TyCtxt<'a, 'tcx, 'tcx>,
+//                                start_id: ast::NodeId,
+//                                start_span: Span) {
+//     let start_def_id = tcx.hir.local_def_id(start_id);
+//     let start_t = tcx.type_of(start_def_id);
+//     match start_t.sty {
+//         ty::TyFnDef(..) => {
+//             match tcx.hir.find(start_id) {
+//                 Some(hir_map::NodeItem(it)) => {
+//                     match it.node {
+//                         hir::ItemFn(..,ref ps,_)
+//                         if !ps.params.is_empty() => {
+//                             struct_span_err!(tcx.sess, ps.span, E0132,
+//                                 "start function is not allowed to have type parameters")
+//                                 .span_label(ps.span,
+//                                             "start function cannot have type parameters")
+//                                 .emit();
+//                             return;
+//                         }
+//                         _ => ()
+//                     }
+//                 }
+//                 _ => ()
+//             }
 
-            let se_ty = tcx.mk_fn_ptr(ty::Binder(
-                tcx.mk_fn_sig(
-                    [
-                        tcx.types.isize,
-                        tcx.mk_imm_ptr(tcx.mk_imm_ptr(tcx.types.u8))
-                    ].iter().cloned(),
-                    tcx.types.isize,
-                    false,
-                    hir::Unsafety::Normal,
-                    Abi::Rust
-                )
-            ));
+//             let se_ty = tcx.mk_fn_ptr(ty::Binder(
+//                 tcx.mk_fn_sig(
+//                     [
+//                         tcx.types.isize,
+//                         tcx.mk_imm_ptr(tcx.mk_imm_ptr(tcx.types.u8))
+//                     ].iter().cloned(),
+//                     tcx.types.isize,
+//                     false,
+//                     hir::Unsafety::Normal,
+//                     Abi::Rust
+//                 )
+//             ));
 
-            require_same_types(
-                tcx,
-                &ObligationCause::new(start_span, start_id, ObligationCauseCode::StartFunctionType),
-                se_ty,
-                tcx.mk_fn_ptr(tcx.fn_sig(start_def_id)));
-        }
-        _ => {
-            span_bug!(start_span,
-                      "start has a non-function type: found `{}`",
-                      start_t);
-        }
-    }
-}
+//             require_same_types(
+//                 tcx,
+//                 &ObligationCause::new(start_span, start_id, ObligationCauseCode::StartFunctionType),
+//                 se_ty,
+//                 tcx.mk_fn_ptr(tcx.fn_sig(start_def_id)));
+//         }
+//         _ => {
+//             span_bug!(start_span,
+//                       "start has a non-function type: found `{}`",
+//                       start_t);
+//         }
+//     }
+// }
 
-fn check_for_entry_fn<'a, 'tcx>(tcx: TyCtxt<'a, 'tcx, 'tcx>) {
-    if let Some((id, sp)) = *tcx.sess.entry_fn.borrow() {
-        match tcx.sess.entry_type.get() {
-            Some(config::EntryMain) => check_main_fn_ty(tcx, id, sp),
-            Some(config::EntryStart) => check_start_fn_ty(tcx, id, sp),
-            Some(config::EntryNone) => {}
-            None => bug!("entry function without a type")
-        }
-    }
-}
+// fn check_for_entry_fn<'a, 'tcx>(tcx: TyCtxt<'a, 'tcx, 'tcx>) {
+//     if let Some((id, sp)) = *tcx.sess.entry_fn.borrow() {
+//         match tcx.sess.entry_type.get() {
+//             Some(config::EntryMain) => check_main_fn_ty(tcx, id, sp),
+//             Some(config::EntryStart) => check_start_fn_ty(tcx, id, sp),
+//             Some(config::EntryNone) => {}
+//             None => bug!("entry function without a type")
+//         }
+//     }
+// }
 
 pub fn provide(providers: &mut Providers) {
     collect::provide(providers);
@@ -351,7 +352,7 @@ pub fn check_crate<'a, 'tcx>(tcx: TyCtxt<'a, 'tcx, 'tcx>)
     time(time_passes, "item-bodies checking", || check::check_item_bodies(tcx))?;
 
     check_unused::check_crate(tcx);
-    check_for_entry_fn(tcx);
+    //check_for_entry_fn(tcx);
 
     tcx.sess.compile_status()
 }
