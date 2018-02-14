@@ -929,7 +929,7 @@ impl RustcDefaultCalls {
     }
 
 
-    fn print_crate_info(trans: &TransCrate,
+    pub fn print_crate_info(trans: &TransCrate,
                         sess: &Session,
                         input: Option<&Input>,
                         odir: &Option<PathBuf>,
